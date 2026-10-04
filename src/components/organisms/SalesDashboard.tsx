@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import { salesData } from '@/data/sales';
 import type { ChartType, SalesYear } from '@/types/sales';
-import { Button } from '@/components/atoms/Button';
 import { FilterBar } from '@/components/molecules/FilterBar';
 import { StatCard } from '@/components/molecules/StatCard';
 import { SalesChart } from './SalesChart';
@@ -13,16 +12,10 @@ export default function SalesDashboard() {
   const [threshold, setThreshold] = useState(0);
   const [chartType, setChartType] = useState<ChartType>('bar');
 
-  const filtered = useMemo(
-    () => salesData[year].filter((item) => item.sales >= threshold),
-    [year, threshold]
-  );
-
+  const filtered = useMemo(() => salesData[year].filter((item) => item.sales >= threshold), [year, threshold]);
   const total = filtered.reduce((sum, item) => sum + item.sales, 0);
   const average = filtered.length ? total / filtered.length : 0;
-  const best = filtered.length
-    ? filtered.reduce((a, b) => (a.sales > b.sales ? a : b))
-    : null;
+  const best = filtered.length ? filtered.reduce((a, b) => (a.sales > b.sales ? a : b)) : null;
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-10">
@@ -33,31 +26,25 @@ export default function SalesDashboard() {
           <p className="mt-2 text-slate-500">Analyze monthly sales for 2022, 2023 and 2024.</p>
         </div>
 
-        <FilterBar year={year} setYear={setYear} threshold={threshold} setThreshold={setThreshold} />
+        <FilterBar
+          year={year}
+          threshold={threshold}
+          chartType={chartType}
+          onYearChange={setYear}
+          onThresholdChange={setThreshold}
+          onChartTypeChange={setChartType}
+        />
 
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <StatCard title="Total Sales" value={total.toLocaleString('en-IN', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} />
-          <StatCard title="Average Monthly Sales" value={average.toLocaleString('en-IN', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} />
+          <StatCard title="Total Sales" value={total.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} />
+          <StatCard title="Average Monthly Sales" value={average.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} />
           <StatCard title="Best Month" value={best ? `${best.month} — $${best.sales.toLocaleString()}` : 'No matching data'} />
         </div>
 
         <section className="mt-6 rounded-2xl bg-white p-5 shadow-card">
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">Sales by Month — {year}</h2>
-            <div className="flex gap-2">
-              {(['bar', 'line', 'pie'] as ChartType[]).map((type) => (
-                <Button key={type} active={chartType === type} onClick={() => setChartType(type)}>
-                  {type[0].toUpperCase() + type.slice(1)}
-                </Button>
-              ))}
-            </div>
-          </div>
-          {filtered.length ? (
-            <SalesChart data={filtered} type={chartType} />
-          ) : (
-            <div className="flex h-80 items-center justify-center text-slate-500">
-              No sales match the selected threshold.
-            </div>
+          <h2 className="mb-5 text-lg font-semibold">Sales by Month — {year}</h2>
+          {filtered.length ? <SalesChart data={filtered} type={chartType} /> : (
+            <div className="flex h-80 items-center justify-center text-slate-500">No sales match the selected threshold.</div>
           )}
         </section>
 
